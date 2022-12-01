@@ -7,12 +7,8 @@ fn main() {
 }
 
 pub fn day_1_part_1() {
-    let chunks = get_int_chunks_from_file("../inputs/1.txt");
-    for chunk in &chunks {
-        for line in chunk {
-            print!("{line} ")
-        }
-        println!("\n");
-    }
-    println!("{}", chunks.len());
+    let elves = get_int_chunks_from_file("../inputs/1.txt");
+
+    let elf_totals: Vec<i32> = elves.iter().map(|elf| elf.iter().sum::<i32>()).collect();
+    println!("{:?}", elf_totals.iter().max());
 }

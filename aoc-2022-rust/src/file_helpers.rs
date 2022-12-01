@@ -27,7 +27,6 @@ pub fn get_int_chunks_from_file(filename: impl AsRef<Path>) -> Vec<Vec<i32>> {
 
     for line in all_lines {
         if line.is_empty() {
-            print!("new chunk");
             let clone = current_chunk.clone();
             result.push(clone);
             current_chunk = vec![];
