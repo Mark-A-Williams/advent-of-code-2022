@@ -1,10 +1,17 @@
+extern crate stopwatch;
 use file_helpers::{get_int_chunks_from_file, get_int_lines_from_file, get_lines_from_file};
+use stopwatch::Stopwatch;
 
 mod file_helpers;
 
 fn main() {
+    let mut sw = Stopwatch::start_new();
     day_1_part_1();
+    println!("Part 1 completed in {}ms", sw.elapsed_ms());
+    sw.reset();
+    sw.start();
     day_1_part_2();
+    println!("Part 2 completed in {}ms", sw.elapsed_ms());
 }
 
 pub fn day_1_part_1() {
