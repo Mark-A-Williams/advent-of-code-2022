@@ -16,7 +16,7 @@ pub fn get_int_lines_from_file(filename: impl AsRef<Path>) -> Vec<i32> {
     let string_lines = get_lines_from_file(filename);
     string_lines
         .iter()
-        .map(|l| str::parse::<i32>(&l).expect("Could not parse to int"))
+        .map(|l| l.parse::<i32>().expect("Could not parse to int"))
         .collect()
 }
 
@@ -31,7 +31,7 @@ pub fn get_int_chunks_from_file(filename: impl AsRef<Path>) -> Vec<Vec<i32>> {
             result.push(clone);
             current_chunk = vec![];
         } else {
-            current_chunk.push(str::parse::<i32>(&line).expect("Could not parse to int"));
+            current_chunk.push(line.parse::<i32>().expect("Could not parse to int"));
         }
     }
 
