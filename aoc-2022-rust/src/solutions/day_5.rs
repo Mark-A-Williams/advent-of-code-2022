@@ -2,29 +2,27 @@ use super::file_helpers::get_lines_from_file;
 
 pub fn part_1() {
     let mut crate_stacks = parse_crates();
-
     let moves = parse_moves();
 
     for crate_move in moves {
         move_crates_9000(&crate_move, &mut crate_stacks)
     }
 
-    for stack in crate_stacks.iter() {
-        print!("{:}", stack.last().unwrap());
-    }
-
-    println!();
+    print_top_items(&crate_stacks);
 }
 
 pub fn part_2() {
     let mut crate_stacks = parse_crates();
-
     let moves = parse_moves();
 
     for crate_move in moves {
         move_crates_9001(&crate_move, &mut crate_stacks)
     }
 
+    print_top_items(&crate_stacks);
+}
+
+fn print_top_items(crate_stacks: &Vec<Vec<char>>) {
     for stack in crate_stacks.iter() {
         print!("{:}", stack.last().unwrap());
     }
