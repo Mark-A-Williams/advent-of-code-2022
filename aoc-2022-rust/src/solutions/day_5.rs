@@ -6,7 +6,7 @@ pub fn part_1() {
     let moves = parse_moves();
 
     for crate_move in moves {
-        move_crates(&crate_move, &mut crate_stacks)
+        move_crates_9000(&crate_move, &mut crate_stacks)
     }
 
     for stack in crate_stacks.iter() {
@@ -17,15 +17,40 @@ pub fn part_1() {
 }
 
 pub fn part_2() {
-    todo!()
+    let mut crate_stacks = parse_crates();
+
+    let moves = parse_moves();
+
+    for crate_move in moves {
+        move_crates_9001(&crate_move, &mut crate_stacks)
+    }
+
+    for stack in crate_stacks.iter() {
+        print!("{:}", stack.last().unwrap());
+    }
+
+    println!();
 }
 
-fn move_crates(crate_move: &CrateMove, crate_stacks: &mut Vec<Vec<char>>) {
+fn move_crates_9000(crate_move: &CrateMove, crate_stacks: &mut Vec<Vec<char>>) {
     let mut crates_moved = 0;
     while crates_moved < crate_move.how_many {
         let popped_crate = &crate_stacks[crate_move.from_index].pop().unwrap();
         crate_stacks[crate_move.to_index].push(popped_crate.to_owned());
         crates_moved += 1;
+    }
+}
+
+fn move_crates_9001(crate_move: &CrateMove, crate_stacks: &mut Vec<Vec<char>>) {
+    let from_stack = &mut crate_stacks[crate_move.from_index];
+    let new_height = from_stack.len() - crate_move.how_many as usize;
+
+    let removed_crates: Vec<char> = from_stack.drain(new_height..).collect();
+
+    let to_stack = &mut crate_stacks[crate_move.to_index];
+
+    for removed_crate in removed_crates {
+        to_stack.push(removed_crate.to_owned());
     }
 }
 
