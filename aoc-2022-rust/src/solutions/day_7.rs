@@ -1,43 +1,80 @@
+extern crate regex;
+
+use regex::Regex;
+
+use super::file_helpers::get_lines_from_file;
+
 pub fn part_1() {
-    /*!*
-    /
-        /a
-            /a/e
-                i
-            f
-            g
-            h.lst
-        b.txt
-        c.dat
-        /d
-            j
-            d.log
-            d.ext
-            k
+    // Types of line
+    // - cd ..
+    // - cd <dirname
+    // - ls
+    // - dir <dirname>
+    // - <filesize> <filename>
 
+    let filesystem = parse_input_to_directory_structure("../inputs/7.example.txt");
 
-     */
-
-    let example_data = Directory {
-        name: "/".to_string(),
-        files: vec![
-            File {
-                name: "b.txt".to_string(),
-                size: 14848514,
-            },
-            File {
-                name: "c.dat".to_string(),
-                size: 8504156,
-            },
-        ],
-        subdirectories: vec![],
-    };
-
-    println!("{}", example_data.get_size())
+    println!("{}", filesystem.get_size())
 }
 
 pub fn part_2() {
     todo!()
+}
+
+fn parse_input_to_directory_structure(input_file: &str) -> Directory {
+    let mut current_location: &str = "";
+    // cd <dir> changes current_location by appending /<dir>
+    // cd .. removes the final / and anything after, i.e. "/a/b" goes to "/a"
+    // Hack: ignore "cd /" as it's a bit different and occurs on and only on the first line
+
+    let mut filesystem = Directory {
+        name: "/".to_string(),
+        files: vec![],
+        subdirectories: vec![],
+    };
+
+    let lines = get_lines_from_file(input_file);
+
+    for line in lines {
+        // Only care about `cd ..`, `cd <name>` and `<filesize> <filename>`
+        if line.starts_with("dir") || line == "$ cd /" || line == "$ ls" {
+            continue;
+        }
+
+        if line.starts_with("cd") {
+            // do stuff
+        } else {
+            let mut correct_subdirectory =
+                get_subdirectory_with_name(&mut filesystem, current_location).unwrap();
+
+            let file_info: Vec<&str> = line.split_ascii_whitespace().collect();
+
+            correct_subdirectory.add_file(File {
+                name: file_info[1].to_string(),
+                size: file_info[0].parse().unwrap(),
+            });
+        }
+    }
+
+    filesystem
+}
+
+fn get_subdirectory_with_name<'a>(
+    directory: &'a mut Directory,
+    name: &'a str,
+) -> Option<&'a mut Directory> {
+    for mut subdirectory in directory.subdirectories.iter_mut() {
+        if subdirectory.name == name {
+            return Some(subdirectory);
+        }
+
+        match get_subdirectory_with_name(subdirectory, name) {
+            Some(result) => return Some(result),
+            None => continue,
+        }
+    }
+
+    None
 }
 
 struct Directory {
@@ -54,9 +91,15 @@ impl Directory {
 
         size_of_files + size_of_subdirectories
     }
+
+    fn add_file(&mut self, file: File) {
+        self.files.push(file)
+    }
 }
 
 struct File {
     name: String,
     size: i32,
 }
+
+enum TerminalLineType {}
