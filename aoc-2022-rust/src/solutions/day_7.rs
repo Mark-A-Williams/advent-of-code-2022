@@ -1,22 +1,29 @@
 use super::file_helpers::get_lines_from_file;
 
 pub fn part_1() {
-    // Types of line
-    // - cd ..
-    // - cd <dirname
-    // - ls
-    // - dir <dirname>
-    // - <filesize> <filename>
+    let filesystem = parse_input_to_directory_structure("../inputs/7.txt");
 
-    let filesystem = parse_input_to_directory_structure("../inputs/7.example.txt");
+    let mut result = 0;
+    add_size_if_below_limit(filesystem, 100000, &mut result);
 
-    println!("{}", filesystem.get_size());
-
-    print_directory(filesystem)
+    println!("{}", result)
 }
 
 pub fn part_2() {
     todo!()
+}
+
+fn add_size_if_below_limit(directory: Directory, limit: i32, result: &mut i32) {
+    let size_of_self = directory.get_size();
+
+    if size_of_self <= limit {
+        println!("{}", directory.name);
+        *result += size_of_self
+    }
+
+    for subdir in directory.subdirectories {
+        add_size_if_below_limit(subdir, limit, result);
+    }
 }
 
 fn print_directory(directory: Directory) {
@@ -100,17 +107,11 @@ fn get_subdirectory_with_name<'a>(
     directory: &'a mut Directory,
     name: &'a String,
 ) -> Option<&'a mut Directory> {
-    println!("{} {}", directory.name, name);
     if directory.name.to_owned() == name.to_owned() {
         return Some(directory);
     }
 
     for mut subdirectory in directory.subdirectories.iter_mut() {
-        // if subdirectory.name.to_owned() == name.to_owned() {
-        //     return Some(subdirectory);
-        // }
-
-        println!("{} {}", subdirectory.name, name);
         match get_subdirectory_with_name(subdirectory, name) {
             Some(result) => return Some(result),
             None => continue,
