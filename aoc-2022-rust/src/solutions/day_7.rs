@@ -1,5 +1,7 @@
 extern crate regex;
 
+use std::thread::current;
+
 use regex::Regex;
 
 use super::file_helpers::get_lines_from_file;
@@ -22,7 +24,7 @@ pub fn part_2() {
 }
 
 fn parse_input_to_directory_structure(input_file: &str) -> Directory {
-    let mut current_location: &str = "";
+    let mut current_location = "/".to_string();
     // cd <dir> changes current_location by appending /<dir>
     // cd .. removes the final / and anything after, i.e. "/a/b" goes to "/a"
     // Hack: ignore "cd /" as it's a bit different and occurs on and only on the first line
@@ -41,11 +43,22 @@ fn parse_input_to_directory_structure(input_file: &str) -> Directory {
             continue;
         }
 
-        if line.starts_with("cd") {
-            // do stuff
+        if line.starts_with("$ cd") {
+            let argument = line.split_ascii_whitespace().last().unwrap();
+
+            if argument == ".." {
+                let current_relative_path = current_location.split("/").last().unwrap();
+                current_location = current_location
+                    .strip_suffix(current_relative_path)
+                    .unwrap()
+                    .to_string();
+                current_location = current_location.strip_suffix("/").unwrap().to_string();
+            } else {
+                current_location = format!("{}/{}", current_location, argument);
+            }
         } else {
             let mut correct_subdirectory =
-                get_subdirectory_with_name(&mut filesystem, current_location).unwrap();
+                get_subdirectory_with_name(&mut filesystem, &current_location).unwrap();
 
             let file_info: Vec<&str> = line.split_ascii_whitespace().collect();
 
@@ -61,10 +74,10 @@ fn parse_input_to_directory_structure(input_file: &str) -> Directory {
 
 fn get_subdirectory_with_name<'a>(
     directory: &'a mut Directory,
-    name: &'a str,
+    name: &'a String,
 ) -> Option<&'a mut Directory> {
     for mut subdirectory in directory.subdirectories.iter_mut() {
-        if subdirectory.name == name {
+        if subdirectory.name.to_owned() == name.to_owned() {
             return Some(subdirectory);
         }
 
