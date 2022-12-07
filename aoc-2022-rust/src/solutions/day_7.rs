@@ -172,5 +172,3 @@ struct File {
     name: String,
     size: i32,
 }
-
-enum TerminalLineType {}
