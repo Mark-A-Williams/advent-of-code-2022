@@ -48,17 +48,6 @@ fn add_size_if_below_limit(directory: Directory, limit: i32, result: &mut i32) {
     }
 }
 
-fn print_directory(directory: Directory) {
-    for file in directory.files.iter() {
-        println!("File {}, size {}", file.name, file.size);
-    }
-
-    for subdir in directory.subdirectories {
-        println!("Subdr {}", subdir.name);
-        print_directory(subdir)
-    }
-}
-
 /// This function is hot garbage and I know it
 fn parse_input_to_directory_structure(input_file: &str) -> Directory {
     let mut current_location = "/".to_string();
@@ -165,6 +154,17 @@ impl Directory {
 
     fn add_subdirectory(&mut self, directory: Directory) {
         self.subdirectories.push(directory)
+    }
+
+    fn print(&self) {
+        for file in self.files.iter() {
+            println!("File {}, size {}", file.name, file.size);
+        }
+
+        for subdir in self.subdirectories.iter() {
+            println!("Subdr {}", subdir.name);
+            self.print()
+        }
     }
 }
 
