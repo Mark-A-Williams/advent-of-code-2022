@@ -10,14 +10,36 @@ pub fn part_1() {
 }
 
 pub fn part_2() {
-    todo!()
+    let filesystem = parse_input_to_directory_structure("../inputs/7.txt");
+
+    let current_unused_space = 70_000_000 - filesystem.get_size();
+    let minimum_size_to_clear = 30_000_000 - current_unused_space;
+
+    let mut result = i32::max_value();
+    get_size_of_smallest_directory_over_minimum(filesystem, minimum_size_to_clear, &mut result);
+    println!("{}", result)
+}
+
+fn get_size_of_smallest_directory_over_minimum(
+    directory: Directory,
+    minimum: i32,
+    result: &mut i32,
+) {
+    let size_of_self = directory.get_size();
+
+    if size_of_self >= minimum && size_of_self < *result {
+        *result = size_of_self
+    }
+
+    for subdir in directory.subdirectories {
+        get_size_of_smallest_directory_over_minimum(subdir, minimum, result);
+    }
 }
 
 fn add_size_if_below_limit(directory: Directory, limit: i32, result: &mut i32) {
     let size_of_self = directory.get_size();
 
     if size_of_self <= limit {
-        println!("{}", directory.name);
         *result += size_of_self
     }
 
@@ -37,6 +59,7 @@ fn print_directory(directory: Directory) {
     }
 }
 
+/// This function is hot garbage and I know it
 fn parse_input_to_directory_structure(input_file: &str) -> Directory {
     let mut current_location = "/".to_string();
 
@@ -76,7 +99,7 @@ fn parse_input_to_directory_structure(input_file: &str) -> Directory {
                     }
                 };
 
-                let mut correct_subdirectory =
+                let correct_subdirectory =
                     get_subdirectory_with_name(&mut filesystem, &current_location).unwrap();
 
                 correct_subdirectory.add_subdirectory(Directory {
@@ -88,7 +111,7 @@ fn parse_input_to_directory_structure(input_file: &str) -> Directory {
                 current_location = new_full_path;
             }
         } else {
-            let mut correct_subdirectory =
+            let correct_subdirectory =
                 get_subdirectory_with_name(&mut filesystem, &current_location).unwrap();
 
             let file_info: Vec<&str> = line.split_ascii_whitespace().collect();
@@ -111,7 +134,7 @@ fn get_subdirectory_with_name<'a>(
         return Some(directory);
     }
 
-    for mut subdirectory in directory.subdirectories.iter_mut() {
+    for subdirectory in directory.subdirectories.iter_mut() {
         match get_subdirectory_with_name(subdirectory, name) {
             Some(result) => return Some(result),
             None => continue,
