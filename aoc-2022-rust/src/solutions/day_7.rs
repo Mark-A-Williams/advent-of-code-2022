@@ -1,9 +1,3 @@
-extern crate regex;
-
-use std::thread::current;
-
-use regex::Regex;
-
 use super::file_helpers::get_lines_from_file;
 
 pub fn part_1() {
@@ -16,18 +10,28 @@ pub fn part_1() {
 
     let filesystem = parse_input_to_directory_structure("../inputs/7.example.txt");
 
-    println!("{}", filesystem.get_size())
+    println!("{}", filesystem.get_size());
+
+    print_directory(filesystem)
 }
 
 pub fn part_2() {
     todo!()
 }
 
+fn print_directory(directory: Directory) {
+    for file in directory.files.iter() {
+        println!("File {}, size {}", file.name, file.size);
+    }
+
+    for subdir in directory.subdirectories {
+        println!("Subdr {}", subdir.name);
+        print_directory(subdir)
+    }
+}
+
 fn parse_input_to_directory_structure(input_file: &str) -> Directory {
     let mut current_location = "/".to_string();
-    // cd <dir> changes current_location by appending /<dir>
-    // cd .. removes the final / and anything after, i.e. "/a/b" goes to "/a"
-    // Hack: ignore "cd /" as it's a bit different and occurs on and only on the first line
 
     let mut filesystem = Directory {
         name: "/".to_string(),
@@ -52,9 +56,29 @@ fn parse_input_to_directory_structure(input_file: &str) -> Directory {
                     .strip_suffix(current_relative_path)
                     .unwrap()
                     .to_string();
-                current_location = current_location.strip_suffix("/").unwrap().to_string();
+
+                if current_location != "/" {
+                    current_location = current_location.strip_suffix("/").unwrap().to_string();
+                }
             } else {
-                current_location = format!("{}/{}", current_location, argument);
+                let new_full_path = {
+                    if current_location == "/" {
+                        format!("/{}", argument)
+                    } else {
+                        format!("{}/{}", current_location, argument)
+                    }
+                };
+
+                let mut correct_subdirectory =
+                    get_subdirectory_with_name(&mut filesystem, &current_location).unwrap();
+
+                correct_subdirectory.add_subdirectory(Directory {
+                    name: new_full_path.clone(), // this is so lazy
+                    files: vec![],
+                    subdirectories: vec![],
+                });
+
+                current_location = new_full_path;
             }
         } else {
             let mut correct_subdirectory =
@@ -76,11 +100,17 @@ fn get_subdirectory_with_name<'a>(
     directory: &'a mut Directory,
     name: &'a String,
 ) -> Option<&'a mut Directory> {
-    for mut subdirectory in directory.subdirectories.iter_mut() {
-        if subdirectory.name.to_owned() == name.to_owned() {
-            return Some(subdirectory);
-        }
+    println!("{} {}", directory.name, name);
+    if directory.name.to_owned() == name.to_owned() {
+        return Some(directory);
+    }
 
+    for mut subdirectory in directory.subdirectories.iter_mut() {
+        // if subdirectory.name.to_owned() == name.to_owned() {
+        //     return Some(subdirectory);
+        // }
+
+        println!("{} {}", subdirectory.name, name);
         match get_subdirectory_with_name(subdirectory, name) {
             Some(result) => return Some(result),
             None => continue,
@@ -107,6 +137,10 @@ impl Directory {
 
     fn add_file(&mut self, file: File) {
         self.files.push(file)
+    }
+
+    fn add_subdirectory(&mut self, directory: Directory) {
+        self.subdirectories.push(directory)
     }
 }
 
