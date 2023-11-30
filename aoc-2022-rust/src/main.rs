@@ -3,7 +3,7 @@
 extern crate stopwatch;
 mod solutions;
 
-use crate::solutions::day_7::{part_1, part_2};
+use crate::solutions::day_8::{part_1, part_2};
 use stopwatch::Stopwatch;
 
 fn main() {

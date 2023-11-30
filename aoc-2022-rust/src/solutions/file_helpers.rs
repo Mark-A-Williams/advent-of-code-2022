@@ -4,6 +4,8 @@ use std::{
     path::Path,
 };
 
+use itertools::Itertools;
+
 pub fn get_lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
     let file = File::open(filename).expect("File not found");
     let buf = BufReader::new(file);
@@ -37,6 +39,25 @@ pub fn get_int_chunks_from_file(filename: impl AsRef<Path>) -> Vec<Vec<i32>> {
 
     if current_chunk.len() > 0 {
         result.push(current_chunk);
+    }
+
+    result
+}
+
+pub fn get_multidimensional_int_array_from_file(filename: impl AsRef<Path>) -> Vec<Vec<u32>> {
+    let all_lines = get_lines_from_file(filename);
+
+    let result: Vec<Vec<u32>> = all_lines
+        .iter()
+        .map(|line| {
+            line.chars()
+                .map(|character| character.to_digit(10).unwrap())
+                .collect()
+        })
+        .collect();
+
+    if result.iter().map(|line| line.len()).unique().count() > 1 {
+        panic!("All lines must be the same length");
     }
 
     result
